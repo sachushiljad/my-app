@@ -1,25 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import TodoForm from "./components/TodoForm";
+import TodoList from "./components/TodoList";
+import { getTodos, addTodo, toggleTodo, deleteTodo } from "./api";
+import "./App.css";
 
-function App() {
+export default function App() {
+  const [todos, setTodos] = useState([]);
+
+  const fetchTodos = async () => {
+    try {
+      const response = await getTodos();
+      setTodos(response.data.todos);
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+    }
+  };
+
+  const handleAdd = async (title, description) => {
+    await addTodo(title, description);
+    fetchTodos();
+  };
+
+  const handleToggle = async (id) => {
+    await toggleTodo(id);
+    fetchTodos();
+  };
+
+  const handleDelete = async (id) => {
+    await deleteTodo(id);
+    fetchTodos();
+  };
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>FastAPI + React To-Do List</h1>
+      <TodoForm onAdd={handleAdd} />
+      <TodoList todos={todos} onToggle={handleToggle} onDelete={handleDelete} />
     </div>
   );
 }
-
-export default App;
